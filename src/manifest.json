@@ -12,13 +12,15 @@
     "content_scripts": [{
         "matches": [ "http://*/*", "https://*/*"],
         "js": ["./content.js"]
+    
     }], 
     "permissions": [
         "activeTab",
         "tabs",
-        "scripting"
+        "scripting",
+        "webRequest"
     ],
     "host_permissions": [
-        "https://www.google.com/*"
+        "*://www.google.com/*"
     ]
 }
