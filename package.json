@@ -1,6 +1,5 @@
-
-  {
-    "name": "browser-extension-project",
+{
+  "name": "browser-extension-project",
   "description": "browser extension",
   "version": "1.0.0",
   "author": "Jordan walsh",
@@ -9,7 +8,7 @@
     "type": "git",
     "url": "git@github.com:jmwalsh91/browser-project-assesment.git"
   },
-    "scripts": {
+  "scripts": {
     "dev": "vite",
     "build": "tsc && vite build && cp src/manifest.json dist/ && cp src/content.js dist/ && cp src/background.js dist/",
     "preview": "vite preview",
@@ -50,6 +49,7 @@
     "@typescript-eslint/eslint-plugin": "5.27.1",
     "@typescript-eslint/parser": "5.27.1",
     "@vitejs/plugin-react": "1.3.2",
+    "c8": "^7.11.3",
     "eslint": "8.17.0",
     "eslint-config-prettier": "8.5.0",
     "eslint-plugin-import": "2.26.0",
