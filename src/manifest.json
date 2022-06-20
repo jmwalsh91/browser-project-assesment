@@ -4,15 +4,14 @@
     "version": "0.5.0",
     "manifest_version": 3,
     "background": {
-        "service_worker": "./src/background.js"
+        "service_worker": "./background.js"
     },
     "action": {
         "default_popup": "./index.html"
     },
-    "options_page": "options.html",
     "content_scripts": [{
         "matches": [ "http://*/*", "https://*/*"],
-        "js": ["./src/content.js"]
+        "js": ["./content.js"]
     }], 
     "permissions": [
         "activeTab",
