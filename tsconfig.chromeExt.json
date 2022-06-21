@@ -25,7 +25,7 @@
   },
     "types": ["vitest/globals"],
   "include": ["chromeExt"],
-  "exclude": ["node_modules", "src", "dist"],
+  "exclude": ["node_modules", "src", "dist", "./chromeExt/tests"],
 /*   "references": [
     {
       "path": "./tsconfig.chrome.node.json"
