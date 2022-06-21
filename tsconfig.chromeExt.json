@@ -1,33 +1,34 @@
 {
   "compilerOptions": {
-    "target": "esnext",
+    "target": "ES6",
     "useDefineForClassFields": true,
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": false,
     "skipLibCheck": true,
-    "esModuleInterop": false,
+    "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
-    "module": "esnext",
+    "module": "ES6",
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noEmit": true,
-    "jsx": "react-jsx",
+    "noEmit": false,
+    "jsx": "preserve",
     "noImplicitAny": true,
     "baseUrl": ".",
     "paths": {
-      "~/*": ["src/*"]
+      "~/*": ["chromeExt/*"]
     },
-    "pretty": true,
-    "types": ["vitest/globals", "@testing-library/jest-dom"]
+    "outDir": "dist",
+    "listEmittedFiles": true,
   },
-  "include": ["src"],
-  "exclude": ["node_modules", "chromeExt", "dist"],
-  "references": [
+    "types": ["vitest/globals"],
+  "include": ["chromeExt"],
+  "exclude": ["node_modules", "src", "dist", "./chromeExt/tests"],
+/*   "references": [
     {
-      "path": "./tsconfig.node.json"
+      "path": "./tsconfig.chrome.node.json"
     }
-  ]
+  ] */
 }
