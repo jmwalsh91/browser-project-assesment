@@ -54,22 +54,19 @@ getAds()
  * TYPES:
  *********/
 type searchElement = HTMLInputElement
-interface searchValue {
-  [key: string]: HTMLInputElement['value']
-}
 /*************
  * end types
  * ***********
  */
 /**
- * create and insert checkbox into DOM
+ *  returns string containing html for checkbox element
  * TODO: examine external state store during next feat and circle back.
  */
-function checkboxTemplate() {
+function checkboxTemplate(): string {
   return `
     <input 
       type="checkbox"
-      
+      checked
       id="checkbox2021"
       name="checkbox2021"
       value="in 2021"
@@ -81,27 +78,33 @@ function checkboxTemplate() {
 }
 
 /**
- * getter for search bar textfield / input element.
+ * getter for combobox (google search bar)
+ *
+ * inserts {@link checkboxTemplate} into DOM.
  *
  * attaches listener to search button.
- *
- *
  */
-function attachSubmitListenerToBtn() {
-  const searchField: searchElement | null = document.querySelector(
+function attachClickListenerToBtn() {
+  //combobox (google search text input)
+  const combobox: searchElement | null = document.querySelector(
     '[aria-label="Search"]'
   )
+  //checkbox element to be place in DOM
   const checkbox2021: string = checkboxTemplate()
-
+  //"Google Search" submit button
   const searchBtn = document.querySelector('[aria-label="Google Search"]')
+  //Insert checkbox into DOM to the right of "Google Search" button
   searchBtn?.insertAdjacentHTML('afterend', checkbox2021)
-  searchBtn?.addEventListener('click', (e) => {
-    console.log('event listener on button submit')
-    searchField?.value ? dispatchURL(searchField.value) : null
+  /**
+   * Attach click-listener to "Google Search" submit button
+   * ONCLICK: if "Combobox" (Google Search text input) contains text, pass value as arg to {@link dispatchURL}.
+   * */
+  searchBtn?.addEventListener('click', () => {
+    combobox?.value ? dispatchURL(combobox.value) : null
   })
 }
-
-attachSubmitListenerToBtn()
+//attach click listener to submit button
+attachClickListenerToBtn()
 
 /**
  * converts provided value to proper query syntax
@@ -109,23 +112,29 @@ attachSubmitListenerToBtn()
  * @returns appended URL as string
  */
 function urlLiteral(val: string) {
+  //concatenate VAL with 'in 2021', convert string to array of "words" seperated by spaces
   const queryWords = `${val} in 2021`.split(' ')
-  console.log(queryWords)
+  //convert array back to string with '+' between each word to conform to query syntax, append after query slug
   const urlLiteral = `google.com/search?q=${queryWords.join('+')}`
-  console.log(urlLiteral)
+  //return url as string literal
   return urlLiteral
 }
 /**
  * evaluates and determines whether provided value (url string) will be dispatched to worker.
- * @param val
- * @returns
+ * @param val if val is not null | undefined, and does not already include 'in 2021'
+ * call {@link urlLiteral} with val as arg, update msgToDispatch obj,
+ * pass msg object to {@link chrome.runtime.sendMessage} to communicate with 'background' worker
+ *
+ * @returns Promise<void>
  */
 async function dispatchURL(val: string) {
   const msgToDispatch = {
     msgUrl: '',
   }
+  //check if val exists, and ensure val does not already include 'in 2021'
   if (val && !val.includes('in 2021')) {
     msgToDispatch.msgUrl = urlLiteral(val)
+    //dispatch message to worker, block function execution until response is defined.
     chrome.runtime.sendMessage(msgToDispatch, (response) => {
       console.log(response)
       return true
