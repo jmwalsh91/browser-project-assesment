@@ -7,7 +7,6 @@ import PopUpBody from './components/PopUpBody'
 export function App() {
   return (
     <section>
-      <h1>test</h1>
       <PopUpBody />
     </section>
   )

@@ -1,12 +1,33 @@
-import React from 'react'
+import { Button, Grid, Paper } from '@mui/material'
+
 import AdTracker from './AdTracker'
+import Header from './Header'
+import PopUpOptions from './PopUpOptions'
 
 function PopUpBody() {
   return (
-    <div style={{ width: '300px' }}>
-      <h2>PopUpBody</h2>
-      <AdTracker/>
-    </div>
+    <Paper
+      sx={{
+        width: 300,
+      }}
+      elevation={6}
+    >
+      <Header />
+      <AdTracker />
+      <PopUpOptions />
+      <Paper
+        elevation={2}
+        sx={{
+          p: 1,
+          display: 'flex',
+          direction: 'row',
+          justifyContent: 'space-between',
+        }}
+      >
+        <Button variant="contained">Action</Button>
+        <Button variant="contained">Action</Button>
+      </Paper>
+    </Paper>
   )
 }
 
