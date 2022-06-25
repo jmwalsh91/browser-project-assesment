@@ -62,13 +62,6 @@ interface searchValue {
  * ***********
  */
 /**
- * sends message to service worker with value in searchbar.
- * @param {searchValue} searchValue
- */
-function dispatchSearchValToWorker(searchValue: searchValue) {
-  chrome.runtime.sendMessage(searchValue)
-}
-/**
  * create and insert checkbox into DOM
  * TODO: examine external state store during next feat and circle back.
  */
@@ -84,33 +77,60 @@ function checkboxTemplate() {
       <label for="checkbox2021">
         Search in 2021
         </label>
-       `
+        `
 }
+
 /**
  * getter for search bar textfield / input element.
  *
  * attaches listener to search button.
  *
- * dispatches ({@link dispatchSearchValToWorker}) message to service worker to initiate query modification.
+ *
  */
-function attachSubmitListenerToForm() {
+function attachSubmitListenerToBtn() {
   const searchField: searchElement | null = document.querySelector(
     '[aria-label="Search"]'
   )
-  const searchForm: HTMLElement | null = document.getElementById('tsf')
+  const checkbox2021: string = checkboxTemplate()
 
-  searchForm
-    ? (searchForm.onformdata = (e) => {
-        e.preventDefault()
-        console.log(e.formData)
-      })
-    : null
-  console.log(searchField)
-
-  searchField?.value
-    ? dispatchSearchValToWorker({ newVal: searchField.value } as searchValue)
-    : null
+  const searchBtn = document.querySelector('[aria-label="Google Search"]')
+  searchBtn?.insertAdjacentHTML('afterend', checkbox2021)
+  searchBtn?.addEventListener('click', (e) => {
+    console.log('event listener on button submit')
+    searchField?.value ? dispatchURL(searchField.value) : null
+  })
 }
-attachSubmitListenerToForm()
+
+attachSubmitListenerToBtn()
+
+/**
+ * converts provided value to proper query syntax
+ * @param val
+ * @returns appended URL as string
+ */
+function urlLiteral(val: string) {
+  const queryWords = `${val} in 2021`.split(' ')
+  console.log(queryWords)
+  const urlLiteral = `google.com/search?q=${queryWords.join('+')}`
+  console.log(urlLiteral)
+  return urlLiteral
+}
+/**
+ * evaluates and determines whether provided value (url string) will be dispatched to worker.
+ * @param val
+ * @returns
+ */
+async function dispatchURL(val: string) {
+  const msgToDispatch = {
+    msgUrl: '',
+  }
+  if (val && !val.includes('in 2021')) {
+    msgToDispatch.msgUrl = urlLiteral(val)
+    chrome.runtime.sendMessage(msgToDispatch, (response) => {
+      console.log(response)
+      return true
+    })
+  }
+}
 
 export {}

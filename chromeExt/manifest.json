@@ -15,9 +15,6 @@
         "js": ["./content.js"]
     
     }],
-    "declarative_net_request": {
-
-    },
     "permissions": [
         "activeTab",
         "tabs",
