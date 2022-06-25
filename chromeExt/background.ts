@@ -17,7 +17,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         { url: `https://${message.msgUrl}` },
         //updated tab object with current properties at time of execution
         (tab) => {
-          if (tab) {
+          if (tab?.status === 'complete') {
             console.log('success', tab)
             //send response with updated tab object
             sendResponse({ tab: tab })

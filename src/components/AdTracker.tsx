@@ -1,7 +1,14 @@
 /* global chrome */
-
-import { Card, CardContent, CardHeader, Stack, Typography } from '@mui/material'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  Skeleton,
+  Stack,
+  Typography,
+} from '@mui/material'
 import Container from '@mui/system/Container'
+import { Suspense } from 'react'
 import useSWR from 'swr'
 
 import { storageManagement } from '~/utils/func/adsSeenMgmt'
@@ -27,13 +34,15 @@ function AdTracker() {
       <CardHeader>AdTracker</CardHeader>
       <CardContent>
         <Stack direction="row">
-          <Container>
-            <Typography sx={{ fontSize: '3rem' }}>Ads seen</Typography>
-            <Typography sx={{ fontSize: '3rem' }}>Past 24 hours</Typography>
-          </Container>
-          <Container>
-            <Typography sx={{ fontSize: '3rem' }}>{data?.adCount}</Typography>
-          </Container>
+          <Suspense fallback={<Skeleton />}>
+            <Container>
+              <Typography sx={{ fontSize: '3rem' }}>Ads seen</Typography>
+              <Typography sx={{ fontSize: '3rem' }}>Past 24 hours</Typography>
+            </Container>
+            <Container>
+              <Typography sx={{ fontSize: '3rem' }}>{data?.adCount}</Typography>
+            </Container>
+          </Suspense>
         </Stack>
       </CardContent>
     </Card>

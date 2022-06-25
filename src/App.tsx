@@ -1,4 +1,4 @@
-/* global chrome */
+/*global chrome*/
 import PopUpBody from './components/PopUpBody'
 
 /**
