@@ -21,7 +21,7 @@
       "~/*": ["src/*"]
     },
     "pretty": true,
-    "types": ["vitest/globals", "@testing-library/jest-dom"]
+    "types": ["vitest/globals", "@testing-library/jest-dom", "@types/chrome"]
   },
   "include": ["src"],
   "exclude": ["node_modules", "chromeExt", "dist"],

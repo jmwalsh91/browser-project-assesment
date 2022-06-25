@@ -1,3 +1,4 @@
+/* global chrome */
 import PopUpBody from './components/PopUpBody'
 
 /**
@@ -6,8 +7,8 @@ import PopUpBody from './components/PopUpBody'
  */
 export function App() {
   return (
-    <section>
+    <div>
       <PopUpBody />
-    </section>
+    </div>
   )
 }
