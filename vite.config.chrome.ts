@@ -11,7 +11,7 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
-        a: '/chromeExt/content.ts',
+        a: '/chromeExt/*.ts',
       },
       output: {
         entryFileNames: '[name].js',

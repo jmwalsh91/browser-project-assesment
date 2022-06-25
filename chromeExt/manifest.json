@@ -14,12 +14,15 @@
         "matches": [ "http://*/*", "https://*/*"],
         "js": ["./content.js"]
     
-    }], 
+    }],
     "permissions": [
         "activeTab",
         "tabs",
         "scripting",
-        "webRequest"
+        "webRequest",
+        "declarativeNetRequest",
+        "declarativeNetRequestWithHostAccess",
+        "declarativeNetRequestFeedback"
     ],
     "host_permissions": [
         "*://www.google.com/*"

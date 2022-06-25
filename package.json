@@ -12,7 +12,7 @@
     "dev": "vite",
     "build:chrome": "tsc -p ./tsconfig.chromeExt.json",
     "build:react": "tsc -p ./tsconfig.json",
-    "build": "yarn run build:react && yarn run vite build && yarn run build:chrome && cp src/manifest.json dist/ && cp chromeExt/background.js dist/",
+    "build": "yarn run build:react && yarn run vite build && yarn run build:chrome && cp src/manifest.json dist/",
     "preview": "vite preview",
     "test": "vitest",
     "test:coverage": "vitest run --coverage",
@@ -37,6 +37,7 @@
     ]
   },
   "dependencies": {
+    "@types/chrome": "^0.0.190",
     "@types/jsdom": "^16.2.14",
     "react": "18.1.0",
     "react-dom": "18.1.0",
