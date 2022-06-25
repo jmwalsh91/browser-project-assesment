@@ -1,4 +1,4 @@
-import { Button, Grid, Paper } from '@mui/material'
+import { Button, Paper } from '@mui/material'
 
 import AdTracker from './AdTracker'
 import Header from './Header'

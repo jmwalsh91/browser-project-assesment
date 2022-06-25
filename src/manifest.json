@@ -19,7 +19,8 @@
         "activeTab",
         "tabs",
         "scripting",
-        "webRequest"
+        "webRequest",
+        "storage"
     ],
     "host_permissions": [
         "*://www.google.com/*"

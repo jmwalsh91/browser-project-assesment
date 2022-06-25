@@ -20,9 +20,7 @@
         "tabs",
         "scripting",
         "webRequest",
-        "declarativeNetRequest",
-        "declarativeNetRequestWithHostAccess",
-        "declarativeNetRequestFeedback"
+        "storage"
     ],
     "host_permissions": [
         "*://www.google.com/*"

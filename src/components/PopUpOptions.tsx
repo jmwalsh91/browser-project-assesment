@@ -1,4 +1,4 @@
-import { Box, Stack, Switch, ToggleButton, Typography } from '@mui/material'
+import { Stack, Switch, Typography } from '@mui/material'
 import { Container } from '@mui/system'
 
 function PopUpOptions() {
