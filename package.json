@@ -37,6 +37,9 @@
     ]
   },
   "dependencies": {
+    "@emotion/react": "^11.9.3",
+    "@emotion/styled": "^11.9.3",
+    "@mui/material": "^5.8.5",
     "@types/chrome": "^0.0.190",
     "@types/jsdom": "^16.2.14",
     "react": "18.1.0",
