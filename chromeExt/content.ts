@@ -163,7 +163,6 @@ async function dispatchURL(val: string) {
     //dispatch message to worker, block function execution until response is defined.
     chrome.runtime.sendMessage(msgToDispatch, (response) => {
       console.log(response)
-      return true
     })
   }
 }

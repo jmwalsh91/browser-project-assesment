@@ -17,11 +17,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         { url: `https://${message.msgUrl}` },
         //updated tab object with current properties at time of execution
         (tab) => {
-          if (tab?.status === 'complete') {
+          if (tab?.status === 'loading') {
             console.log('success', tab)
             //send response with updated tab object
-            sendResponse({ tab: tab })
-            return true
+            chrome.webNavigation.onCompleted.addListener(function (details) {
+              console.log(tab.status, 'oncompleted')
+              sendResponse({ tab: tab })
+            })
           }
           if (!tab) {
             console.log('error', tab)
