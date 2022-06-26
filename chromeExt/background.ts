@@ -5,6 +5,19 @@
  **/
 
 /**
+ * Set object in chrome synced storage with time and window location. Object has shape of {time (string) : length of timeArray}.
+ * @param {number[]} timeArray array of time values from Data.now() in {@link redifyList}
+ * @example { '1519211810362' : 4 }
+ */
+function storeAds(timeArray: number[]) {
+  chrome.storage.sync.set(
+    { timeQuantity: [timeArray[0], timeArray.length] },
+    function () {
+      console.log(`set ${[timeArray[0], timeArray.length]}`)
+    }
+  )
+}
+/**
  *listen for onMessage event
  **/
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -37,5 +50,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   //Return true to appease the Promise Gods, apparently.
   return true
 })
+
 //FIXME: Type Module didn't appear to work, going to have to examine tsconfig
 export {}

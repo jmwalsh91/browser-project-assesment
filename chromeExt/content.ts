@@ -5,19 +5,6 @@
  **/
 
 /**
- * Set object in chrome synced storage with time and window location. Object has shape of {time (string) : length of timeArray}.
- * @param {number[]} timeArray array of time values from Data.now() in {@link redifyList}
- * @example { '1519211810362' : 4 }
- */
-function storeAds(timeArray: number[]) {
-  chrome.storage.sync.set(
-    { timeQuantity: [timeArray[0], timeArray.length] },
-    function () {
-      console.log(`set ${[timeArray[0], timeArray.length]}`)
-    }
-  )
-}
-/**
  * iterates over provided array of HTMLElements, changing background color of each element to red.
  * @param {NodeListOf<HTMLElement>} adsArray
  * @returns void
@@ -37,9 +24,10 @@ function redifyList(adsArray: NodeListOf<HTMLElement>) {
     adsArray[i].style.backgroundColor = 'red'
     adsToStore.push(Date.now())
   }
-
-  storeAds(adsToStore)
+//No callback
+  chrome.runtime.sendMessage({ reason: 'storeAds' })
 }
+
 /**
  * Gets element with where id = 'tads', then selects children div elements with data attribute 'data-text-ad'.
  *
