@@ -3,25 +3,19 @@
  * BACKGROUND WORKER
  * *****************
  **/
-/**
- * Broker/Router
- */
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  switch (message.reason) {
-    case 'storeAds':
-      message.adsEncountered.quantity !== 0 || undefined
-        ? adMemory(message.adsEncountered)
-        : null
-      break
-    case 'append':
-      //TODO: GATE
-      appendUrl(sender, message.msgUrl, sendResponse)
-  }
-  message.reason === 'storeAds' ? adMemory(message.adsEncountered) : null
-})
-interface AdsMSGData {
-  adsEncountered: AdsEncounteredMSG
+/* enum Reason {
+  'storeAds',
+  'append'
+} */
+
+interface msg {
+  reason: 'storeAds' | 'append'
+  adsEncountered?: AdsEncounteredMSG
+  msgUrl?: string
 }
+/* interface AdsMSGData {
+  adsEncountered: AdsEncounteredMSG
+} */
 interface AdsEncounteredMSG {
   time: number
   quantity: number
@@ -30,6 +24,24 @@ type AdsEncounteredArray = [
   AdsEncounteredMSG['time'],
   AdsEncounteredMSG['quantity']
 ][]
+
+/**
+ * Broker/Router
+ */
+chrome.runtime.onMessage.addListener(
+  (message: msg, sender: chrome.runtime.MessageSender, sendResponse) => {
+    switch (message.reason) {
+      case 'storeAds':
+        message.adsEncountered?.quantity !== (0 || undefined)
+          ? adMemory(message.adsEncountered)
+          : null
+        break
+      case 'append':
+        //TODO: GATE
+        appendUrl(sender, message.msgUrl, sendResponse)
+    }
+  }
+)
 
 //Needs:
 //Distinguish between AdsEncountered { time, quantity} from MSG
@@ -83,13 +95,21 @@ const adMemory = function ({ time, quantity }: AdsEncounteredMSG) {
           : initAdMemory(time, quantity)
         return adsEncounteredArray
       })
-    return console.log(adsInStorage)
+    console.log(adsInStorage)
+    return true
   }
 
   return updateAds(time, quantity)
 }
 
-async function appendUrl(sender, msgUrl, sendResponse) {
+async function appendUrl(
+  sender: chrome.runtime.MessageSender,
+  msgUrl: msg['msgUrl'],
+  sendResponse: {
+    (response?: any): void
+    (arg0: { tab: chrome.tabs.Tab | undefined }): void
+  }
+) {
   chrome.tabs.update(
     // ID of tab where message originated from / sendMessage was fired
     sender.tab?.id as number,
@@ -98,9 +118,11 @@ async function appendUrl(sender, msgUrl, sendResponse) {
     //updated tab object with current properties at time of execution
     (tab) => {
       sendResponse({ tab: tab })
-      chrome.tabs.goForward(sender.tab.id, () => {
-        return true
-      })
+      sender.tab
+        ? chrome.tabs.goForward(sender.tab!.id!, () => {
+            return true
+          })
+        : sendResponse(chrome.runtime.lastError)
     }
   )
 }
