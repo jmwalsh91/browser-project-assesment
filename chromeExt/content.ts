@@ -145,16 +145,16 @@ function urlLiteral(val: string) {
  * @returns Promise<void>
  */
 async function dispatchURL(val: string) {
-  const msgToDispatch = {
-    msgUrl: '',
-  }
+
   //check if val exists, and ensure val does not already include 'in 2021'
   if (val && !val.includes('in 2021')) {
-    msgToDispatch.msgUrl = urlLiteral(val)
     //dispatch message to worker, block function execution until response is defined.
-    chrome.runtime.sendMessage(msgToDispatch, (response) => {
-      console.log(response)
-    })
+    chrome.runtime.sendMessage(
+      { reason: 'append', msgUrl: urlLiteral(val) },
+      (response) => {
+        console.log(response)
+      }
+    )
   }
 }
 

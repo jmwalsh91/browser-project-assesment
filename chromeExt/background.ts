@@ -6,7 +6,17 @@
 /**
  * Broker/Router
  */
-chrome.runtime.onMessage.addListener((message) => {
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  switch (message.reason) {
+    case 'storeAds':
+      message.adsEncountered.quantity !== 0 || undefined
+        ? adMemory(message.adsEncountered)
+        : null
+      break
+    case 'append':
+      //TODO: GATE
+      appendUrl(sender, message.msgUrl, sendResponse)
+  }
   message.reason === 'storeAds' ? adMemory(message.adsEncountered) : null
 })
 interface AdsMSGData {
@@ -56,7 +66,7 @@ const adMemory = function ({ time, quantity }: AdsEncounteredMSG) {
    * gets adsInStorage and conditionally updates storage
    * @param data
    */
-  async function update(
+  async function updateAds(
     time: AdsEncounteredMSG['time'],
     quantity: AdsEncounteredMSG['quantity']
   ) {
@@ -76,41 +86,49 @@ const adMemory = function ({ time, quantity }: AdsEncounteredMSG) {
     return console.log(adsInStorage)
   }
 
-  return update(time, quantity)
+  return updateAds(time, quantity)
 }
-/**
- *listen for onMessage event
- **/
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  // if message.msgUrl is not null or undefined, update URL in tab where sendMessage originated
-  const outcome = message.msgUrl
-    ? chrome.tabs.update(
-        // ID of tab where message originated from / sendMessage was fired
-        sender.tab?.id as number,
-        //url to navigate to in ^ tab.
-        { url: `https://${message.msgUrl}` },
-        //updated tab object with current properties at time of execution
-        (tab) => {
-          if (tab?.status === 'loading') {
-            console.log('success', tab)
-            //send response with updated tab object
-            chrome.webNavigation.onCompleted.addListener(function (details) {
-              console.log(tab.status, 'oncompleted')
-              sendResponse({ tab: tab })
-            })
-          }
-          if (!tab) {
-            console.log('error', tab)
-            //send response with error if tab is falsey
-            sendResponse({ error: chrome.runtime.lastError })
-          }
-        }
-      )
-    : //Do nothing.
-      null
-  //Return true to appease the Promise Gods, apparently.
-  return true
-})
 
+async function appendUrl(sender, msgUrl, sendResponse) {
+  chrome.tabs.update(
+    // ID of tab where message originated from / sendMessage was fired
+    sender.tab?.id as number,
+    //url to navigate to in ^ tab.
+    { url: `https://${msgUrl}` },
+    //updated tab object with current properties at time of execution
+    (tab) => {
+      sendResponse({ tab: tab })
+      chrome.tabs.goForward(sender.tab.id, () => {
+        return true
+      })
+    }
+  )
+}
+
+// if message.msgUrl is not null or undefined, update URL in tab where sendMessage originated
+/* 
+chrome.tabs.update(
+  // ID of tab where message originated from / sendMessage was fired
+  sender.tab?.id as number,
+  //url to navigate to in ^ tab.
+  { url: `https://${message.msgUrl}` },
+  //updated tab object with current properties at time of execution
+  (tab) => {
+    if (tab?.status === 'loading') {
+      console.log('success', tab)
+      //send response with updated tab object
+      chrome.webNavigation.onCompleted.addListener(function (details) {
+        console.log(tab.status, 'oncompleted')
+        sendResponse({ tab: tab })
+      })
+    }
+    if (!tab) {
+      console.log('error', tab)
+      //send response with error if tab is falsey
+      sendResponse({ error: chrome.runtime.lastError })
+    }
+  }
+)
+ */
 //FIXME: Type Module didn't appear to work, going to have to examine tsconfig
 export {}
