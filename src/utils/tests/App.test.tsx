@@ -4,8 +4,8 @@ import { describe, test } from 'vitest'
 import { App } from '../../App'
 
 describe('App tests', () => {
-  test('App children has popup text', () => {
+  test('App children has header text', () => {
     render(<App />)
-    expect(screen.getByText(/Popup/i))
+    expect(screen.getByText(/ThingApp/i))
   })
 })

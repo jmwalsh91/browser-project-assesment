@@ -24,8 +24,11 @@ function redifyList(adsArray: NodeListOf<HTMLElement>) {
     adsArray[i].style.backgroundColor = 'red'
     adsToStore.push(Date.now())
   }
-//No callback
-  chrome.runtime.sendMessage({ reason: 'storeAds' })
+  //No callback
+  chrome.runtime.sendMessage({
+    reason: 'storeAds',
+    adsEncountered: { time: Date.now(), quantity: adsToStore.length },
+  })
 }
 
 /**

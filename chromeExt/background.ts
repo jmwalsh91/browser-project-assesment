@@ -3,19 +3,80 @@
  * BACKGROUND WORKER
  * *****************
  **/
-
 /**
- * Set object in chrome synced storage with time and window location. Object has shape of {time (string) : length of timeArray}.
- * @param {number[]} timeArray array of time values from Data.now() in {@link redifyList}
- * @example { '1519211810362' : 4 }
+ * Broker/Router
  */
-function storeAds(timeArray: number[]) {
-  chrome.storage.sync.set(
-    { timeQuantity: [timeArray[0], timeArray.length] },
-    function () {
-      console.log(`set ${[timeArray[0], timeArray.length]}`)
-    }
-  )
+chrome.runtime.onMessage.addListener((message) => {
+  message.reason === 'storeAds' ? adMemory(message.adsEncountered) : null
+})
+interface AdsMSGData {
+  adsEncountered: AdsEncounteredMSG
+}
+interface AdsEncounteredMSG {
+  time: number
+  quantity: number
+}
+type AdsEncounteredArray = [
+  AdsEncounteredMSG['time'],
+  AdsEncounteredMSG['quantity']
+][]
+
+//Needs:
+//Distinguish between AdsEncountered { time, quantity} from MSG
+// and adsEncounteredArray from .get()
+
+const adMemory = function ({ time, quantity }: AdsEncounteredMSG) {
+  /**
+   * initializes adMemory in db
+   * @param data
+   *  * @example { '1519211810362' : 4 }
+   */
+  function initAdMemory(
+    time: AdsEncounteredMSG['time'],
+    quantity: AdsEncounteredMSG['quantity']
+  ) {
+    chrome.storage.sync.set({ adsEncountered: [time, quantity] })
+  }
+  /**
+   * appends array of adsData
+   * @param data
+   */
+  function appendAdMemory(
+    adsEncounteredArray: AdsEncounteredArray,
+    time: AdsEncounteredMSG['time'],
+    quantity: AdsEncounteredMSG['quantity']
+  ) {
+    console.log('adsEncountered')
+    adsEncounteredArray.push([time, quantity])
+    console.log(adsEncounteredArray)
+    console.log('after push')
+    chrome.storage.sync.set({ adsEncountered: adsEncounteredArray })
+  }
+  /**
+   * gets adsInStorage and conditionally updates storage
+   * @param data
+   */
+  async function update(
+    time: AdsEncounteredMSG['time'],
+    quantity: AdsEncounteredMSG['quantity']
+  ) {
+    const adsInStorage = await chrome.storage.sync
+      .get('adsEncountered') //[time, quantity]
+      .then((data) => {
+        const adsEncounteredArray = data.adsEncountered
+        adsEncounteredArray && adsEncounteredArray.length > 0
+          ? appendAdMemory(
+              adsEncounteredArray as AdsEncounteredArray,
+              time,
+              quantity
+            )
+          : initAdMemory(time, quantity)
+        return adsEncounteredArray
+      })
+    return console.log(adsInStorage)
+  }
+
+  return update(time, quantity)
 }
 /**
  *listen for onMessage event
