@@ -18,6 +18,7 @@ interface AdsEncounteredMSG {
  * @returns void
  */
 function redifyList(adsArray: NodeListOf<HTMLElement>) {
+  console.log(adsArray)
   //
   /*   interface AdKeyValue {
   Date: number
@@ -90,6 +91,7 @@ type searchElement = HTMLInputElement
  * end types
  * ***********
  */
+
 /**
  *  returns string containing html for checkbox element
  * TODO: examine external state store during next feat and circle back.

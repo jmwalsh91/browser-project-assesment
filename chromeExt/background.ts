@@ -43,52 +43,46 @@ type AdsEncounteredArray = [
  * Response typing for sendResponse
  */
 type responseObj = { message: string }
-/**
- * *******
- * Route msg + Logic
- * ********
- */
-/**
- * Promise closure
- *
- */
-async function routeMsg(
-  message: msg,
-  sender: chrome.runtime.MessageSender,
-  sendResponse: (response?: any) => void
-) {
-  switch (message.reason) {
-    case 'storeAds':
-      console.log('storeAds case')
-      message.adsEncountered && message.adsEncountered.quantity > 0
-        ? await adMemory(message.adsEncountered, sendResponse)
-        : sendResponse({ message: 'No encountered ads provided.' })
-      break
-    case 'append':
-      console.log('append case')
-      await appendUrl(sender, message.msgUrl, sendResponse)
-      console.log('after append in switch')
-      break
-    default:
-      console.log('default case')
-      sendResponse({
-        message:
-          'This is not the happy path. I do not even know what path we are on',
-      })
-  }
-  console.log('before resolve routemsg')
-  return Promise.resolve(true)
-}
-/**
- * Listener: routes msg data to relevant function
- */
-chrome.runtime.onMessage.addListener(
-  (message: msg, sender: chrome.runtime.MessageSender, sendResponse) => {
-    sendResponse({ message: 'begin' })
-    return routeMsg(message, sender, sendResponse)
-  }
-)
 
+/**
+ * Listener
+ */
+function msgListener() {
+  return chrome.runtime.onMessage.addListener(
+    //Params
+    async (message: msg, sender: chrome.runtime.MessageSender, sendResponse) =>
+      //callback
+      {
+        console.log('msgListener')
+        const adsResponse = new Promise<void>((resolve, reject) => {
+          message.adsEncountered && message.reason === 'storeAds'
+            ? resolve(adMemory(message.adsEncountered))
+            : reject('no bueno')
+        })
+        const appendResponse = new Promise<void>((resolve, reject) => {
+          message.msgUrl && message.reason === 'append'
+            ? resolve(appendUrl(sender, message.msgUrl, sendResponse))
+            : reject('no append')
+        })
+        return Promise.allSettled([adsResponse, appendResponse]).then(
+          (responses) => {
+            sendResponse({
+              message: {
+                adsResponse: responses[0],
+                appendResponse: responses[1],
+              },
+            })
+            return {
+              adsResponse: responses[0],
+              appendResponse: responses[1],
+            }
+          }
+        )
+      }
+  )
+}
+
+msgListener()
 /**
  * ***********************
  * STORE ADS ENCOUNTERED
@@ -111,38 +105,7 @@ chrome.runtime.onMessage.addListener(
  * @returns Promise<boolean>
  */
 
-const adMemory = function (
-  { time, quantity }: AdsEncounteredMSG,
-  sendResponse: { (response?: any): void; (arg0: { message: string }): void }
-) {
-  /**
-   * initializes adMemory in db
-   * @param data
-   *  * @example { '1519211810362' : 4 }
-   */
-  function initAdMemory(
-    time: AdsEncounteredMSG['time'],
-    quantity: AdsEncounteredMSG['quantity']
-  ) {
-    chrome.storage.sync.set({ adsEncountered: [time, quantity] })
-    sendResponse({ message: 'ad memory initialized' })
-    return true
-  }
-  /**
-   * appends array of adsData
-   * @param data
-   */
-  function appendAdMemory(
-    adsEncounteredArray: AdsEncounteredArray,
-    time: AdsEncounteredMSG['time'],
-    quantity: AdsEncounteredMSG['quantity']
-  ) {
-    adsEncounteredArray.push([time, quantity])
-    chrome.storage.sync.set({ adsEncountered: adsEncounteredArray })
-    sendResponse({ message: 'ad memory appended' })
-    console.log(adsEncounteredArray)
-    return true
-  }
+const adMemory = function ({ time, quantity }: AdsEncounteredMSG) {
   /**
    * gets adsInStorage and conditionally updates storage
    * @param data
@@ -160,6 +123,31 @@ const adMemory = function (
           quantity
         )
       : initAdMemory(time, quantity)
+  }
+  /**
+   * initializes adMemory in db
+   * @param data
+   *  * @example { '1519211810362' : 4 }
+   */
+  function initAdMemory(
+    time: AdsEncounteredMSG['time'],
+    quantity: AdsEncounteredMSG['quantity']
+  ) {
+    chrome.storage.sync.set({ adsEncountered: [time, quantity] })
+    return true
+  }
+  /**
+   * appends array of adsData
+   * @param data
+   */
+  function appendAdMemory(
+    adsEncounteredArray: AdsEncounteredArray,
+    time: AdsEncounteredMSG['time'],
+    quantity: AdsEncounteredMSG['quantity']
+  ) {
+    adsEncounteredArray.push([time, quantity])
+    chrome.storage.sync.set({ adsEncountered: adsEncounteredArray })
+    return adsEncounteredArray
   }
   return updateAds(time, quantity)
 }
@@ -189,30 +177,5 @@ async function appendUrl(
   return outcome
 }
 
-// if message.msgUrl is not null or undefined, update URL in tab where sendMessage originated
-/* 
-chrome.tabs.update(
-  // ID of tab where message originated from / sendMessage was fired
-  sender.tab?.id as number,
-  //url to navigate to in ^ tab.
-  { url: `https://${message.msgUrl}` },
-  //updated tab object with current properties at time of execution
-  (tab) => {
-    if (tab?.status === 'loading') {
-      console.log('success', tab)
-      //send response with updated tab object
-      chrome.webNavigation.onCompleted.addListener(function (details) {
-        console.log(tab.status, 'oncompleted')
-        sendResponse({ tab: tab })
-      })
-    }
-    if (!tab) {
-      console.log('error', tab)
-      //send response with error if tab is falsey
-      sendResponse({ error: chrome.runtime.lastError })
-    }
-  }
-)
- */
 //FIXME: Type Module didn't appear to work, going to have to examine tsconfig
 export {}
