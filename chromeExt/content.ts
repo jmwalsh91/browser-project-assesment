@@ -3,7 +3,15 @@
  * Content Scripts
  ******************
  **/
-
+interface msg {
+  reason: 'storeAds' | 'append'
+  adsEncountered?: AdsEncounteredMSG
+  msgUrl?: string
+}
+interface AdsEncounteredMSG {
+  time: number
+  quantity: number
+}
 /**
  * iterates over provided array of HTMLElements, changing background color of each element to red.
  * @param {NodeListOf<HTMLElement>} adsArray
@@ -16,19 +24,25 @@ function redifyList(adsArray: NodeListOf<HTMLElement>) {
   url: string
   } */
 
-  /* Set object in chrome synced storage with time and window location.
+  /*
+  TODO: docs
    */
   const adsToStore: number[] | null = []
-
+  /*
+  TODO: docs
+   */
   for (let i = 0; i < adsArray.length; i++) {
     adsArray[i].style.backgroundColor = 'red'
     adsToStore.push(Date.now())
   }
-  //No callback
-  chrome.runtime.sendMessage({
-    reason: 'storeAds',
-    adsEncountered: { time: Date.now(), quantity: adsToStore.length },
-  })
+  //Verify if ads were encountered
+  adsToStore.length > 0
+    ? //Dispatch message
+      chrome.runtime.sendMessage({
+        reason: 'storeAds',
+        adsEncountered: { time: Date.now(), quantity: adsToStore.length },
+      })
+    : null
 }
 
 /**
@@ -43,6 +57,7 @@ function getAds() {
   const adContainer: HTMLElement | null = document.getElementById('tads')
   adContainer &&
     redifyList(
+      //TODO: add parent selector
       adContainer.querySelectorAll(
         'div[data-text-ad]'
       ) as NodeListOf<HTMLElement>
@@ -144,15 +159,14 @@ function urlLiteral(val: string) {
  *
  * @returns Promise<void>
  */
-async function dispatchURL(val: string) {
-
+function dispatchURL(val: string) {
   //check if val exists, and ensure val does not already include 'in 2021'
   if (val && !val.includes('in 2021')) {
-    //dispatch message to worker, block function execution until response is defined.
+    //dispatch message to worker
     chrome.runtime.sendMessage(
       { reason: 'append', msgUrl: urlLiteral(val) },
       (response) => {
-        console.log(response)
+        return console.log(response)
       }
     )
   }
