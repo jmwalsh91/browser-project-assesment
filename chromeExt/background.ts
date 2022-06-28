@@ -54,6 +54,10 @@ function msgListener() {
       //callback
       {
         console.log('msgListener')
+        /**
+         * {@link adsResponse}: if message.reason is 'storeAds' and message.adsEncountered, resolve promise with the result of executing {@link adMemory}.
+         *
+         */
         const adsResponse = new Promise<void>((resolve, reject) => {
           message.adsEncountered && message.reason === 'storeAds'
             ? resolve(adMemory(message.adsEncountered))
@@ -61,21 +65,17 @@ function msgListener() {
         })
         const appendResponse = new Promise<void>((resolve, reject) => {
           message.msgUrl && message.reason === 'append'
-            ? resolve(appendUrl(sender, message.msgUrl, sendResponse))
+            ? resolve(appendUrl(sender, message.msgUrl))
             : reject('no append')
         })
         return Promise.allSettled([adsResponse, appendResponse]).then(
           (responses) => {
-            sendResponse({
-              message: {
+            return Promise.resolve(
+              sendResponse({
                 adsResponse: responses[0],
                 appendResponse: responses[1],
-              },
-            })
-            return {
-              adsResponse: responses[0],
-              appendResponse: responses[1],
-            }
+              })
+            )
           }
         )
       }
@@ -91,16 +91,9 @@ msgListener()
 
 /*****
  * adMemory
- * @param
- *
- * calls updateAds {@link updateAds}, which then conditionally calls either:
- *
- * {@link initAdMemory} (case where there is no AdsEncountered data in storage)
- *
- * OR
- *
- * {@link appendAdMemory} (case: AdsEncountered exists in storage) pushes current entry to end of AdsEncountered array
- *
+ * * adMemory calls {@link updateAds} which gets adsEncountered from storage --> if data, {@link appendAdMemory} else {@link initAdMemory}
+ * @param {time} time ads were encountered
+ * @param {quantity} quantity of ads encountered
  *
  * @returns Promise<boolean>
  */
@@ -126,8 +119,9 @@ const adMemory = function ({ time, quantity }: AdsEncounteredMSG) {
   }
   /**
    * initializes adMemory in db
-   * @param data
-   *  * @example { '1519211810362' : 4 }
+   * @param {time} time ads were encountered
+   * @param {quantity} quantity of ads encountered
+   * @example { '1519211810362' : 4 }
    */
   function initAdMemory(
     time: AdsEncounteredMSG['time'],
@@ -138,7 +132,10 @@ const adMemory = function ({ time, quantity }: AdsEncounteredMSG) {
   }
   /**
    * appends array of adsData
-   * @param data
+   * @param {adsEncounteredArray} adsEncounteredArray array of arrays containing values corresponding to [time, quantity].
+   *
+   * @param {time} time ads were encountered
+   * @param {quantity} quantity of ads encountered
    */
   function appendAdMemory(
     adsEncounteredArray: AdsEncounteredArray,
@@ -154,27 +151,27 @@ const adMemory = function ({ time, quantity }: AdsEncounteredMSG) {
 
 async function appendUrl(
   sender: chrome.runtime.MessageSender,
-  msgUrl: msg['msgUrl'],
-  sendResponse: {
-    (response?: any): void
-    (arg0: { tab: chrome.tabs.Tab | undefined }): void
-  }
+  msgUrl: msg['msgUrl']
 ) {
   console.log('appendUrl')
   console.log({ sender, msgUrl })
+  //Get tab that sendMessage was called from. Will sendMessage with results of executing the following promises.
+  const [currTab] = await chrome.tabs.query({
+    active: true,
+    lastFocusedWindow: true,
+  })
   const outcome = chrome.tabs.update(
     // ID of tab where message originated from / sendMessage was fired
-    sender.tab?.id as number,
+    currTab.id as number,
     //url to navigate to in ^ tab.
     { url: `https://${msgUrl}` },
     //updated tab object with current properties at time of execution
     (tab) => {
       console.log(tab)
-      sendResponse({ message: tab })
-      return true
+      return { tab: tab }
     }
   )
-  return outcome
+  return Promise.resolve(outcome)
 }
 
 //FIXME: Type Module didn't appear to work, going to have to examine tsconfig
