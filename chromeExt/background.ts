@@ -12,6 +12,7 @@
  * INTERFACES & TYPES
  * *******************
  */
+
 /**
  * message from content script
  */
@@ -39,10 +40,7 @@ type AdsEncounteredArray = [
   AdsEncounteredMSG['time'],
   AdsEncounteredMSG['quantity']
 ][]
-/**
- * Response typing for sendResponse
- */
-type responseObj = { message: string }
+
 
 /**
  * Listener
@@ -58,17 +56,19 @@ function msgListener() {
          * {@link adsResponse}: if message.reason is 'storeAds' and message.adsEncountered, resolve promise with the result of executing {@link adMemory}.
          *
          */
-        const adsResponse = new Promise<void>((resolve, reject) => {
+        const adsResponse = await new Promise<void>((resolve, reject) => {
           message.adsEncountered && message.reason === 'storeAds'
             ? resolve(adMemory(message.adsEncountered))
             : reject('no bueno')
         })
-        const appendResponse = new Promise<void>((resolve, reject) => {
+        return adsResponse
+        /* const appendResponse = new Promise<void>((resolve, reject) => {
           message.msgUrl && message.reason === 'append'
             ? resolve(appendUrl(sender, message.msgUrl))
-            : reject('no append')
-        })
-        return Promise.allSettled([adsResponse, appendResponse]).then(
+            : reject('no append') */
+      }
+  )
+  /*  return Promise.allSettled([adsResponse, appendResponse]).then(
           (responses) => {
             return Promise.resolve(
               sendResponse({
@@ -77,9 +77,7 @@ function msgListener() {
               })
             )
           }
-        )
-      }
-  )
+        ) */
 }
 
 msgListener()
@@ -147,31 +145,6 @@ const adMemory = function ({ time, quantity }: AdsEncounteredMSG) {
     return adsEncounteredArray
   }
   return updateAds(time, quantity)
-}
-
-async function appendUrl(
-  sender: chrome.runtime.MessageSender,
-  msgUrl: msg['msgUrl']
-) {
-  console.log('appendUrl')
-  console.log({ sender, msgUrl })
-  //Get tab that sendMessage was called from. Will sendMessage with results of executing the following promises.
-  const [currTab] = await chrome.tabs.query({
-    active: true,
-    lastFocusedWindow: true,
-  })
-  const outcome = chrome.tabs.update(
-    // ID of tab where message originated from / sendMessage was fired
-    currTab.id as number,
-    //url to navigate to in ^ tab.
-    { url: `https://${msgUrl}` },
-    //updated tab object with current properties at time of execution
-    (tab) => {
-      console.log(tab)
-      return { tab: tab }
-    }
-  )
-  return Promise.resolve(outcome)
 }
 
 //FIXME: Type Module didn't appear to work, going to have to examine tsconfig

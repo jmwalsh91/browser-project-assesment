@@ -17,6 +17,7 @@ interface AdsEncounteredMSG {
  * @param {NodeListOf<HTMLElement>} adsArray
  * @returns void
  */
+
 function redifyList(adsArray: NodeListOf<HTMLElement>) {
   console.log(adsArray)
   //
@@ -118,60 +119,29 @@ function checkboxTemplate(): string {
  *
  * attaches listener to search button.
  */
-function attachClickListenerToBtn() {
-  //combobox (google search text input)
-  const combobox: searchElement | null = document.querySelector(
-    '[aria-label="Search"]'
-  )
-  //checkbox element to be place in DOM
-  const checkbox2021: string = checkboxTemplate()
-  //"Google Search" submit button
-  const searchBtn = document.querySelector('[aria-label="Google Search"]')
+function setupListeners() {
+  /*  const optionState = { 
+    settingAppend: //get user options
+} */
+  const domObj = {
+    //combobox (google search text input)
+    combobox: <HTMLInputElement>document.querySelector('[role="combobox"]'),
+    //checkbox element to be placed in DOM
+    //pass option state for conditional return
+    checkbox2021: <string>checkboxTemplate(),
+    //"Google Search" submit button
+    searchBtn: document.querySelector('[aria-label="Google Search"]'),
+  }
+  console.log(domObj)
   //Insert checkbox into DOM to the right of "Google Search" button
-  searchBtn?.insertAdjacentHTML('afterend', checkbox2021)
-  /**
-   * Attach click-listener to "Google Search" submit button
-   * ONCLICK: if "Combobox" (Google Search text input) contains text, pass value as arg to {@link dispatchURL}.
-   * */
-  searchBtn?.addEventListener('click', () => {
-    combobox?.value ? dispatchURL(combobox.value) : null
+  domObj.searchBtn?.insertAdjacentHTML('afterend', domObj.checkbox2021)
+
+  domObj.combobox?.addEventListener('change', () => {
+    domObj.combobox?.value && !domObj.combobox.value.includes(' in 2021')
+      ? (domObj.combobox.value = domObj.combobox.value + ' in 2021')
+      : 0
   })
 }
-//attach click listener to submit button
-attachClickListenerToBtn()
-
-/**
- * converts provided value to proper query syntax
- * @param val
- * @returns appended URL as string
- */
-function urlLiteral(val: string) {
-  //concatenate VAL with 'in 2021', convert string to array of "words" seperated by spaces
-  const queryWords = `${val} in 2021`.split(' ')
-  //convert array back to string with '+' between each word to conform to query syntax, append after query slug
-  const urlLiteral = `google.com/search?q=${queryWords.join('+')}`
-  //return url as string literal
-  return urlLiteral
-}
-/**
- * evaluates and determines whether provided value (url string) will be dispatched to worker.
- * @param val if val is not null | undefined, and does not already include 'in 2021'
- * call {@link urlLiteral} with val as arg, update msgToDispatch obj,
- * pass msg object to {@link chrome.runtime.sendMessage} to communicate with 'background' worker
- *
- * @returns Promise<void>
- */
-function dispatchURL(val: string) {
-  //check if val exists, and ensure val does not already include 'in 2021'
-  if (val && !val.includes('in 2021')) {
-    //dispatch message to worker
-    chrome.runtime.sendMessage(
-      { reason: 'append', msgUrl: urlLiteral(val) },
-      (response) => {
-        return console.log(response)
-      }
-    )
-  }
-}
+setupListeners()
 
 export {}
