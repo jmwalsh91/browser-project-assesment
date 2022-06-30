@@ -122,13 +122,18 @@ async function getAppendPreference(): Promise<boolean> {
 }
 let appendPreference = getAppendPreference()
 /**
- *  returns string containing html for checkbox element
- * TODO: examine external state store during next feat and circle back.
+ * @function indicatorTemplate
+ * Replace with IIFE?
+ * @returns template literal containing html for indicator element
+ * 
  */
 async function indicatorTemplate(): Promise<string> {
-  const indicatorDisplay = (await appendPreference) ? 'block' : 'none'
+  const indicatorDisplay = (await appendPreference) ? 'flex' : 'none'
   return `
-    <div style="
+    <div
+      aria-label="in 2021"
+      aria-description="appends search with 'in 2021'. can change setting in extension popup"  
+      style="
       position: absolute;
       right: 0;
       top: 0;
@@ -136,8 +141,15 @@ async function indicatorTemplate(): Promise<string> {
       display: ${indicatorDisplay};
       align-items: center;
       justify-content: center;
+      background-color: #0079D3;
+      padding: 0;
+      border-radius: 12%;
+      height: 2rem;
       ">
-        <p>
+        <p style="
+        padding-y: 0;
+        padding-x: 0.25rem;
+        ">
           +in2021
         </p>
     </div>
@@ -176,7 +188,7 @@ function optionsListener() {
       if (changes.append2021) {
         appendPreference = changes.append2021.newValue
         domObj.indicator2021.style.display = (await appendPreference)
-          ? 'block'
+          ? 'flex'
           : 'none'
       }
     }
