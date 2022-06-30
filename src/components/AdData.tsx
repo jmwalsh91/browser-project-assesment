@@ -5,7 +5,11 @@ import Typography from '@mui/material/Typography'
 import useSWR from 'swr'
 
 import { storageManagement } from '~/utils/func/adsSeenMgmt'
-
+/**
+ * @function adsSeenGetter
+ * Gets ads encountered from storage. If no data is found, it returns an empty object.
+ * @returns {Promise<{adCount: number}>}
+ */
 async function adsSeenGetter(): Promise<{ adCount: number }> {
   const adCount = await chrome.storage.sync
     .get('adsEncountered')

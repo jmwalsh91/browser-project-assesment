@@ -12,7 +12,7 @@
     "module":"ES6",
     "moduleResolution": "node",
     "resolveJsonModule": true,
-    "isolatedModules": true,
+    "isolatedModules": false,
     "noEmit": false,
     "jsx": "preserve",
     "noImplicitAny": true,
@@ -22,10 +22,16 @@
     },
     "outDir": "dist",
     "listEmittedFiles": true,
+    
   },
     "types": ["vitest/globals"],
   "include": ["chromeExt"],
-  "exclude": ["node_modules", "src", "dist", "./chromeExt/tests"],
+  "exclude": ["node_modules", "src", "dist", "./chromeExt/tests", "docs"],
+  "typedocOptions": {
+    "entryPointStrategy": "expand",
+    "entryPoints": ["chromeExt/index.ts"],
+    "out": "docs"
+  }
 /*   "references": [
     {
       "path": "./tsconfig.chrome.node.json"

@@ -21,7 +21,8 @@
     "format": "prettier src",
     "typecheck": "tsc",
     "generate": "plop",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "docs": "typedoc --out ./src && typedoc --out ./chromeExt"
   },
   "husky": {
     "hooks": {

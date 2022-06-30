@@ -9,12 +9,13 @@ export interface TaskMemory {
 }
 
 /**
- * Gets object conforming to {@link TaskMemory} interface from {@link getOldAndCountNew} {array of values to clear, # of ads encountered in 24hrs}
+ * @function storageManagement
+ * Gets object conforming to {@link TaskMemory} interface from {@link getOldAndCountNew} array of values to clear, # of ads encountered in 24hrs
  *
  * If there are old entries in array of values to clear, pass array as argument to {@link removeOldEntries}
  * @param currentTime time since epoch
  * @param data
- * @returns adCount {number}
+ * @returns adCount: number
  */
 export async function storageManagement(
   currentTime: number,
@@ -33,6 +34,7 @@ export async function storageManagement(
   return { adCount: count }
 }
 /**
+ * @function getOldAndCountNew
  * Find all entries stored more than 24hr ago and return them as an array alongside the count of entries that did not meet that condition
  * @param currentTime time since epoch
  * @param data  {@link AdsEncounteredArray}

@@ -14,7 +14,8 @@
  */
 
 /**
- * message from content script
+ * @interface msg
+ * message from content script, contains reason and adsEncountered
  */
 interface msg {
   reason: 'storeAds' | 'append'
@@ -26,6 +27,7 @@ interface msg {
 } */
 
 /**
+ * @interface AdsEncounteredMSG
  * time of encounter, # of ads encountered
  */
 interface AdsEncounteredMSG {
@@ -41,9 +43,10 @@ type AdsEncounteredArray = [
   AdsEncounteredMSG['quantity']
 ][]
 
-
 /**
- * Listener
+ * @function msgListener
+ * Listener for messages from content script
+ * @returns adsResponse
  */
 function msgListener() {
   return chrome.runtime.onMessage.addListener(
@@ -53,8 +56,7 @@ function msgListener() {
       {
         console.log('msgListener')
         /**
-         * {@link adsResponse}: if message.reason is 'storeAds' and message.adsEncountered, resolve promise with the result of executing {@link adMemory}.
-         *
+         * {@link adsResponse}: if message.reason is 'storeAds' and message.adsEncountered, resolve promise with the result of executing {@link adMemory}
          */
         const adsResponse = await new Promise<void>((resolve, reject) => {
           message.adsEncountered && message.reason === 'storeAds'
@@ -62,44 +64,33 @@ function msgListener() {
             : reject('no bueno')
         })
         return adsResponse
-        /* const appendResponse = new Promise<void>((resolve, reject) => {
-          message.msgUrl && message.reason === 'append'
-            ? resolve(appendUrl(sender, message.msgUrl))
-            : reject('no append') */
       }
   )
-  /*  return Promise.allSettled([adsResponse, appendResponse]).then(
-          (responses) => {
-            return Promise.resolve(
-              sendResponse({
-                adsResponse: responses[0],
-                appendResponse: responses[1],
-              })
-            )
-          }
-        ) */
 }
 
 msgListener()
 /**
  * ***********************
  * STORE ADS ENCOUNTERED
- * *******
+ * ***********************
  * */
 
 /*****
- * adMemory
+ *@function adMemory
  * * adMemory calls {@link updateAds} which gets adsEncountered from storage --> if data, {@link appendAdMemory} else {@link initAdMemory}
- * @param {time} time ads were encountered
- * @param {quantity} quantity of ads encountered
  *
- * @returns Promise<boolean>
+ * @param {time} time ads were encountered
+ * @param {quantity} quantity of ads encountered  @interface AdsEncounteredMSG
+ *
+ * @returns {Promise<boolean>}
  */
-
 const adMemory = function ({ time, quantity }: AdsEncounteredMSG) {
   /**
+   * @function updateAds
    * gets adsInStorage and conditionally updates storage
-   * @param data
+   * @interface {@link adsEncounteredMsg}
+   * @param {time} time ads were encountered
+   * @param {quantity} quantity of ads encountered
    */
   async function updateAds(
     time: AdsEncounteredMSG['time'],
@@ -116,6 +107,7 @@ const adMemory = function ({ time, quantity }: AdsEncounteredMSG) {
       : initAdMemory(time, quantity)
   }
   /**
+   * @function initAdMemory
    * initializes adMemory in db
    * @param {time} time ads were encountered
    * @param {quantity} quantity of ads encountered
@@ -129,6 +121,7 @@ const adMemory = function ({ time, quantity }: AdsEncounteredMSG) {
     return true
   }
   /**
+   * @function appendAdMemory
    * appends array of adsData
    * @param {adsEncounteredArray} adsEncounteredArray array of arrays containing values corresponding to [time, quantity].
    *

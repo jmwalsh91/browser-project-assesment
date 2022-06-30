@@ -14,13 +14,14 @@ import {
 
 import OptionsErrorFallback from './OptionsErrorFallback'
 /**
+ * @function PopUpOptions
  * Handles setting of user preference re: 'append 2021'
  * @returns {ReactJSXElement}
  */
 function PopUpOptions() {
-  //In the event that the update takes a perceptible amount of time, indicate to the user that the update is in progress
+  /**In the event that the update takes a perceptible amount of time, indicate to the user that the update is in progress */
   const [isUpdating, startUpdating] = useTransition()
-  //Get the current status of the 'append 2021' option
+  /**Get the current status of the 'append 2021' option */
   const { data } = useSWR('appendStatus', getCurrentAppendStatus, {
     suspense: true,
   })
@@ -28,7 +29,7 @@ function PopUpOptions() {
     console.log(data)
   }, [data])
   const [checked, setChecked] = useState(data)
-  //conditional string literal to be used in css literal while isUpdating === true
+  /**conditional string literal to be used in css literal while isUpdating === true */
   const updateStyle = isUpdating ? `opacity: .7;` : ''
   /**
    * Handles the toggle of the 'append2021' option and updates the entry in storage

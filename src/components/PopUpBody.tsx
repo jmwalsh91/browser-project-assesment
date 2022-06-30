@@ -8,6 +8,18 @@ import Header from './Header'
 import OptionsErrorFallback from './OptionsErrorFallback'
 import PopUpOptions from './PopUpOptions'
 
+/**
+ * @function PopUpBody
+ * Main structure for the extension "popup" UI, providing the following components:
+ *
+ * {@link Header} - Header component
+ *
+ * {@link PopUpOptions} - Options component
+ *
+ * {@link AdTracker} - AdTracker component, which in turn renders the AdData component
+ *
+ * @returns {ReactJSXElement}
+ */
 function PopUpBody() {
   return (
     <Paper

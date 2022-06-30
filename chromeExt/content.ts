@@ -1,7 +1,12 @@
 /**
  ******************
- * Content Scripts
+ * Content Script
  ******************
+ **/
+/**
+ * ************
+ * INTERFACES
+ * ************
  **/
 interface msg {
   reason: 'storeAds' | 'append'
@@ -16,22 +21,34 @@ interface AdsEncounteredMSG {
 type options = {
   append2021: boolean
 }
+/**
+ * @interface DomObj
+ */
 interface DomObj {
   combobox: HTMLInputElement
   searchBtn: Element | null
-  checkbox2021?: HTMLInputElement | null
+  indicator2021?: HTMLInputElement | null
 }
+/**
+ * *********************************
+ * GET EXTERNAL STATE,
+ * DOM OBJECTS, SETUP LISTENERS
+ * *********************************
+ */
+const domObj: DomObj = {
+  //combobox (google search text input)
+  combobox: <HTMLInputElement>document.querySelector('[role="combobox"]'),
+  //"Google Search" submit button
+  searchBtn: document.querySelector('[aria-label="Google Search"]'),
+}
+
 /**
  * iterates over provided array of HTMLElements, changing background color of each element to red.
  * @param {NodeListOf<HTMLElement>} adsArray
  * @returns void
  */
-
 function redifyList(adsArray: NodeListOf<HTMLElement>) {
   console.log(adsArray)
-  /*
-  
-   */
   let count = 0
   /*
   TODO: docs
@@ -96,76 +113,73 @@ getAds()
  * @returns appendStatus
  */
 async function getAppendPreference(): Promise<boolean> {
-  const { appendStatus } = await chrome.storage.sync.get('append2021')
-  console.log(appendStatus)
-  appendStatus !== (true || false)
+  const { append2021 } = await chrome.storage.sync.get('append2021')
+  console.log(append2021)
+  append2021 !== (true || false)
     ? chrome.storage.sync.set({ append2021: false })
     : null
-  return appendStatus as boolean
+  return append2021 as boolean
 }
+let appendPreference = getAppendPreference()
 /**
  *  returns string containing html for checkbox element
  * TODO: examine external state store during next feat and circle back.
  */
-function checkboxTemplate(): string {
+async function indicatorTemplate(): Promise<string> {
+  const indicatorDisplay = (await appendPreference) ? 'block' : 'none'
   return `
-  <p>Appending 2021</p>
-      `
+    <div style="
+      position: absolute;
+      right: 0;
+      top: 0;
+      transform: translate(50%, -50%);
+      display: ${indicatorDisplay};
+      align-items: center;
+      justify-content: center;
+      ">
+        <p>
+          +in2021
+        </p>
+    </div>
+        `
 }
 
 /**
  * Get elements in DOM and add 'change' event listener to combobox
  */
 async function setupListeners() {
-  const domObj: DomObj = {
-    //combobox (google search text input)
-    combobox: <HTMLInputElement>document.querySelector('[role="combobox"]'),
-    //"Google Search" submit button
-    searchBtn: document.querySelector('[aria-label="Google Search"]'),
-  }
   console.log(domObj)
-  const checkbox = checkboxTemplate()
-  const preference = await getAppendPreference()
-  //Insert checkbox into DOM to the right of "Google Search" button
-  domObj.searchBtn?.insertAdjacentHTML('afterend', checkbox)
-  //Get checkbox in DOM
-  domObj.checkbox2021 = document.getElementById(
-    'checkbox2021'
+  const indicator = indicatorTemplate()
+  //Insert indicator into DOM to the right of "Google Search" button
+  domObj.searchBtn?.insertAdjacentHTML('afterend', await indicator)
+  //Get indicator in DOM
+  domObj.indicator2021 = document.getElementById(
+    'indicator2021'
   ) as HTMLInputElement
 
-  domObj.combobox?.addEventListener('change', () => {
-    domObj.combobox?.value &&
+  domObj.combobox?.addEventListener('change', async () => {
     !domObj.combobox.value.includes(' in 2021') &&
-    domObj.checkbox2021?.style.display === 'block'
+    (await appendPreference) === true
       ? (domObj.combobox.value = domObj.combobox.value + ' in 2021')
-      : 0
-  })
-  /**
-   * listen for changes in options
-   */
-  chrome.storage.onChanged.addListener(async function (
-    changes,
-    areaName
-  ): Promise<void> {
-    console.log('storage changed')
-    console.log(changes)
-    console.log(changes.append2021.newValue)
-    //hide checkbox if preference is false
-    if (
-      changes.append2021.newValue === true &&
-      domObj.checkbox2021?.style.display === 'none'
-    ) {
-      domObj.checkbox2021.style.display = 'block'
-    }
-    //show checkbox if preference is true
-    if (
-      changes.append2021.newValue === false &&
-      domObj.checkbox2021?.style.display === 'block'
-    ) {
-      domObj.checkbox2021.style.display = 'none'
-    }
+      : ''
   })
 }
 setupListeners()
 
-export {}
+/**
+ * listen for changes in options
+ */
+function optionsListener() {
+  chrome.storage.onChanged.addListener(async function (changes, areaName) {
+    console.log('storage changed', changes, areaName)
+    if (domObj.indicator2021) {
+      if (changes.append2021) {
+        appendPreference = changes.append2021.newValue
+        domObj.indicator2021.style.display = (await appendPreference)
+          ? 'block'
+          : 'none'
+      }
+    }
+  })
+}
+optionsListener()

@@ -2,6 +2,7 @@ type Props = {
   children?: JSX.Element | JSX.Element[]
 }
 /**
+ * @function PopUpWrapper
  *Wrapper component for popup.
  * @returns children
  */

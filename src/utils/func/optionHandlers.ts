@@ -8,10 +8,11 @@ export function handleAppendToggle(newAppendStatus: boolean): boolean {
   const result = chrome.storage.sync.set(
     { append2021: newAppendStatus },
     function () {
-      chrome.runtime.lastError
+      const outcome = chrome.runtime.lastError
         ? chrome.runtime.lastError
-        : console.log('Append newAppendStatus set to ' + newAppendStatus)
-      return chrome.storage.sync.get('append2021')
+        : chrome.storage.sync.get('append2021')
+
+      return outcome
     }
   )
   console.log(result)
@@ -24,13 +25,13 @@ export function handleAppendToggle(newAppendStatus: boolean): boolean {
  */
 export async function getCurrentAppendStatus(): Promise<boolean> {
   console.log('getCurrentAppendStatus')
-  let { appendStatus } = await chrome.storage.sync.get('append2021')
-  if (appendStatus === undefined) {
-    console.log('appendStatus is undefined')
+  let { append2021 } = await chrome.storage.sync.get('append2021')
+  if (append2021 === undefined) {
+    console.log('append2021 is undefined')
     chrome.storage.sync.set({ append2021: false })
-    appendStatus = false
+    append2021 = false
   }
-  console.log(appendStatus)
-  console.log(' is appendStatus')
-  return appendStatus as boolean
+  console.log(append2021)
+  console.log(' is append2021')
+  return append2021 as boolean
 }
