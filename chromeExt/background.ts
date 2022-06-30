@@ -125,7 +125,7 @@ const adMemory = function ({ time, quantity }: AdsEncounteredMSG) {
     time: AdsEncounteredMSG['time'],
     quantity: AdsEncounteredMSG['quantity']
   ) {
-    chrome.storage.sync.set({ adsEncountered: [time, quantity] })
+    chrome.storage.sync.set({ adsEncountered: [[time, quantity]] })
     return true
   }
   /**
@@ -142,6 +142,7 @@ const adMemory = function ({ time, quantity }: AdsEncounteredMSG) {
   ) {
     adsEncounteredArray.push([time, quantity])
     chrome.storage.sync.set({ adsEncountered: adsEncounteredArray })
+    console.log(adsEncounteredArray)
     return adsEncounteredArray
   }
   return updateAds(time, quantity)

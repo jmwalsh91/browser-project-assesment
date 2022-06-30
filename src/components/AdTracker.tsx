@@ -1,51 +1,20 @@
 /* global chrome */
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  Skeleton,
-  Stack,
-  Typography,
-} from '@mui/material'
-import Container from '@mui/system/Container'
+import { Skeleton, Stack } from '@mui/material'
 import { Suspense } from 'react'
-import useSWR from 'swr'
+import { ErrorBoundary } from 'react-error-boundary'
 
-import { storageManagement } from '~/utils/func/adsSeenMgmt'
-
-async function adsSeenGetter(): Promise<{
-  adCount: number
-}> {
-  return chrome.storage.sync
-    .get()
-    .then(async (data) => {
-      console.log(data)
-      const count = await storageManagement(Date.now().toString(), data)
-      return count
-    })
-    .catch((error) => error({ message: ErrorEvent }))
-}
+import AdData from './AdData'
+import ErrorFallback from './ErrorFallback'
 
 function AdTracker() {
-  const { data } = useSWR('syncStorage', adsSeenGetter)
-
   return (
-    <Card sx={{ backgroundColor: 'bisque' }}>
-      <CardHeader>AdTracker</CardHeader>
-      <CardContent>
-        <Stack direction="row">
-          <Suspense fallback={<Skeleton />}>
-            <Container>
-              <Typography sx={{ fontSize: '3rem' }}>Ads seen</Typography>
-              <Typography sx={{ fontSize: '3rem' }}>Past 24 hours</Typography>
-            </Container>
-            <Container>
-              <Typography sx={{ fontSize: '3rem' }}>{data?.adCount}</Typography>
-            </Container>
-          </Suspense>
-        </Stack>
-      </CardContent>
-    </Card>
+    <Stack direction="row">
+      <ErrorBoundary FallbackComponent={ErrorFallback}>
+        <Suspense fallback={<Skeleton width={280} height={200} />}>
+          <AdData />
+        </Suspense>
+      </ErrorBoundary>
+    </Stack>
   )
 }
 

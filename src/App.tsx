@@ -6,8 +6,8 @@ import PopUpBody from './components/PopUpBody'
  */
 export function App() {
   return (
-    <div>
+    <>
       <PopUpBody />
-    </div>
+    </>
   )
 }

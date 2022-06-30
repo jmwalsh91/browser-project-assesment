@@ -1,7 +1,11 @@
-import { Button, Paper } from '@mui/material'
+import { Button, Container, Paper, Skeleton, Typography } from '@mui/material'
+import { Suspense } from 'react'
+import { ErrorBoundary } from 'react-error-boundary'
 
 import AdTracker from './AdTracker'
+import ErrorFallback from './ErrorFallback'
 import Header from './Header'
+import OptionsErrorFallback from './OptionsErrorFallback'
 import PopUpOptions from './PopUpOptions'
 
 function PopUpBody() {
@@ -9,24 +13,27 @@ function PopUpBody() {
     <Paper
       sx={{
         width: 300,
+        height: 300,
       }}
       elevation={6}
     >
       <Header />
-      <AdTracker />
-      <PopUpOptions />
-      <Paper
-        elevation={2}
+      <ErrorBoundary FallbackComponent={ErrorFallback}>
+        <AdTracker />
+      </ErrorBoundary>
+      <ErrorBoundary FallbackComponent={OptionsErrorFallback}>
+        <Suspense fallback={<Skeleton />}>
+          <PopUpOptions />
+        </Suspense>
+      </ErrorBoundary>
+      <Container
         sx={{
           p: 1,
           display: 'flex',
           direction: 'row',
           justifyContent: 'space-between',
         }}
-      >
-        <Button variant="contained">Action</Button>
-        <Button variant="contained">Action</Button>
-      </Paper>
+      ></Container>
     </Paper>
   )
 }

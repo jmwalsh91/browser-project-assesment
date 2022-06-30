@@ -12,6 +12,15 @@ interface AdsEncounteredMSG {
   time: number
   quantity: number
 }
+
+type options = {
+  append2021: boolean
+}
+interface DomObj {
+  combobox: HTMLInputElement
+  searchBtn: Element | null
+  checkbox2021?: HTMLInputElement | null
+}
 /**
  * iterates over provided array of HTMLElements, changing background color of each element to red.
  * @param {NodeListOf<HTMLElement>} adsArray
@@ -20,29 +29,26 @@ interface AdsEncounteredMSG {
 
 function redifyList(adsArray: NodeListOf<HTMLElement>) {
   console.log(adsArray)
-  //
-  /*   interface AdKeyValue {
-  Date: number
-  url: string
-  } */
-
   /*
-  TODO: docs
+  
    */
-  const adsToStore: number[] | null = []
+  let count = 0
   /*
   TODO: docs
    */
   for (let i = 0; i < adsArray.length; i++) {
     adsArray[i].style.backgroundColor = 'red'
-    adsToStore.push(Date.now())
+    count++
   }
   //Verify if ads were encountered
-  adsToStore.length > 0
+  count > 0
     ? //Dispatch message
-      chrome.runtime.sendMessage({
+      chrome.runtime.sendMessage(<msg>{
         reason: 'storeAds',
-        adsEncountered: { time: Date.now(), quantity: adsToStore.length },
+        adsEncountered: <AdsEncounteredMSG>{
+          time: Date.now(),
+          quantity: count,
+        },
       })
     : null
 }
@@ -69,77 +75,95 @@ function getAds() {
     document.getElementsByClassName('cu-container')
   shoppingAdContainer &&
     redifyList(
-      document.querySelectorAll('a[data-offer-id]') as NodeListOf<HTMLElement>
+      //try div >
+      document.querySelectorAll(
+        'div > a[data-offer-id]'
+      ) as NodeListOf<HTMLElement>
     )
 }
 //invoke getAds
 getAds()
 
 /**
- * FIXME: Figure out config: TS needs export statement here to circumvent duplicate function implementation err, and chrome does not like the presence of an import or export statement in the compiled script --> current solution is to manually delete the export statement in the dist folder, which is certainly not ideal.
- */
-
-/**
  * *************
  *  APPEND QUERY
  * **************
  */
-/*********
- * TYPES:
- *********/
-type searchElement = HTMLInputElement
-/*************
- * end types
- * ***********
+/**
+ * Get user preference for appending 'in 2021' to search query.
+ *
+ * sets 'append2021' to false if it does not exist in storage.
+ * @returns appendStatus
  */
-
+async function getAppendPreference(): Promise<boolean> {
+  const { appendStatus } = await chrome.storage.sync.get('append2021')
+  console.log(appendStatus)
+  appendStatus !== (true || false)
+    ? chrome.storage.sync.set({ append2021: false })
+    : null
+  return appendStatus as boolean
+}
 /**
  *  returns string containing html for checkbox element
  * TODO: examine external state store during next feat and circle back.
  */
 function checkboxTemplate(): string {
   return `
-    <input 
-      type="checkbox"
-      checked
-      id="checkbox2021"
-      name="checkbox2021"
-      value="in 2021"
-      />
-      <label for="checkbox2021">
-        Search in 2021
-        </label>
-        `
+  <p>Appending 2021</p>
+      `
 }
 
 /**
- * getter for combobox (google search bar)
- *
- * inserts {@link checkboxTemplate} into DOM.
- *
- * attaches listener to search button.
+ * Get elements in DOM and add 'change' event listener to combobox
  */
-function setupListeners() {
-  /*  const optionState = { 
-    settingAppend: //get user options
-} */
-  const domObj = {
+async function setupListeners() {
+  const domObj: DomObj = {
     //combobox (google search text input)
     combobox: <HTMLInputElement>document.querySelector('[role="combobox"]'),
-    //checkbox element to be placed in DOM
-    //pass option state for conditional return
-    checkbox2021: <string>checkboxTemplate(),
     //"Google Search" submit button
     searchBtn: document.querySelector('[aria-label="Google Search"]'),
   }
   console.log(domObj)
+  const checkbox = checkboxTemplate()
+  const preference = await getAppendPreference()
   //Insert checkbox into DOM to the right of "Google Search" button
-  domObj.searchBtn?.insertAdjacentHTML('afterend', domObj.checkbox2021)
+  domObj.searchBtn?.insertAdjacentHTML('afterend', checkbox)
+  //Get checkbox in DOM
+  domObj.checkbox2021 = document.getElementById(
+    'checkbox2021'
+  ) as HTMLInputElement
 
   domObj.combobox?.addEventListener('change', () => {
-    domObj.combobox?.value && !domObj.combobox.value.includes(' in 2021')
+    domObj.combobox?.value &&
+    !domObj.combobox.value.includes(' in 2021') &&
+    domObj.checkbox2021?.style.display === 'block'
       ? (domObj.combobox.value = domObj.combobox.value + ' in 2021')
       : 0
+  })
+  /**
+   * listen for changes in options
+   */
+  chrome.storage.onChanged.addListener(async function (
+    changes,
+    areaName
+  ): Promise<void> {
+    console.log('storage changed')
+    console.log(changes)
+    console.log(changes.append2021.newValue)
+    //hide checkbox if preference is false
+    if (
+      changes.append2021.newValue === true &&
+      domObj.checkbox2021?.style.display === 'none'
+    ) {
+      domObj.checkbox2021.style.display = 'block'
+    }
+    //show checkbox if preference is true
+    if (
+      changes.append2021.newValue === false &&
+      domObj.checkbox2021?.style.display === 'block'
+    ) {
+      domObj.checkbox2021.style.display = 'none'
+    }
   })
 }
 setupListeners()
