@@ -1,4 +1,3 @@
-/* global chrome */
 import { Skeleton, Stack } from '@mui/material'
 import { Suspense } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'

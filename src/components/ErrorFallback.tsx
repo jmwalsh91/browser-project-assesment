@@ -5,7 +5,7 @@ type Props = {
 }
 /**
  * @function ErrorFallback Fallback for ErrorBoundary
- * @param error {@link ErrorBoundary} error object 
+ * @param error {@link ErrorBoundary} error object
  * @returns error.message
  */
 function ErrorFallback({ error }: Props) {

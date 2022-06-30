@@ -1,11 +1,4 @@
-import {
-  Button,
-  Container,
-  Paper,
-  Skeleton,
-  Stack,
-  Typography,
-} from '@mui/material'
+import { Paper, Skeleton, Stack } from '@mui/material'
 import { Suspense } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 
