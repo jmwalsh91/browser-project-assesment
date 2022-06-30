@@ -50,21 +50,22 @@ type AdsEncounteredArray = [
  */
 function msgListener() {
   return chrome.runtime.onMessage.addListener(
-    //Params
-    async (message: msg, sender: chrome.runtime.MessageSender, sendResponse) =>
-      //callback
-      {
-        console.log('msgListener')
-        /**
-         * {@link adsResponse}: if message.reason is 'storeAds' and message.adsEncountered, resolve promise with the result of executing {@link adMemory}
-         */
-        const adsResponse = await new Promise<void>((resolve, reject) => {
-          message.adsEncountered && message.reason === 'storeAds'
-            ? resolve(adMemory(message.adsEncountered))
-            : reject('no bueno')
-        })
-        return adsResponse
-      }
+    async (
+      message: msg,
+      sender: chrome.runtime.MessageSender,
+      sendResponse
+    ) => {
+      console.log('msgListener')
+      /**
+       * {@link adsResponse}: if message.reason is 'storeAds' and message.adsEncountered, resolve promise with the result of executing {@link adMemory}
+       */
+      const adsResponse = await new Promise<void>((resolve, reject) => {
+        message.adsEncountered && message.reason === 'storeAds'
+          ? resolve(adMemory(message.adsEncountered))
+          : reject('no bueno')
+      })
+      return adsResponse
+    }
   )
 }
 
@@ -96,7 +97,10 @@ const adMemory = function ({ time, quantity }: AdsEncounteredMSG) {
     time: AdsEncounteredMSG['time'],
     quantity: AdsEncounteredMSG['quantity']
   ) {
-    const adsInStorage = await chrome.storage.sync.get('adsEncountered') //[time, quantity]
+    /**
+     * get adsEncountered from storage: if there are entries, append to array, else init array with first entry in correct shape/format
+     */
+    const adsInStorage = await chrome.storage.sync.get('adsEncountered')
     const adsEncounteredArray = adsInStorage.adsEncountered
     adsEncounteredArray && adsEncounteredArray.length > 0
       ? appendAdMemory(
@@ -140,6 +144,3 @@ const adMemory = function ({ time, quantity }: AdsEncounteredMSG) {
   }
   return updateAds(time, quantity)
 }
-
-//FIXME: Type Module didn't appear to work, going to have to examine tsconfig
-export {}

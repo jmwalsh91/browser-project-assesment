@@ -44,7 +44,7 @@ function PopUpOptions() {
     })
   }
   return (
-    <Container>
+    <Container sx={{ display: 'flex' }}>
       <Stack direction="row" gap={1} justifyContent="space-between">
         <Typography variant="body1"> Append queries with 'in 2021'?</Typography>{' '}
         <ErrorBoundary FallbackComponent={OptionsErrorFallback}>
@@ -63,26 +63,17 @@ function PopUpOptions() {
           </Suspense>
         </ErrorBoundary>
       </Stack>
-      {data}
       <Button
+        color="secondary"
         variant="contained"
         onClick={() => {
           handleSave()
         }}
         css={css`
-          background: rgba(27, 5, 5, 0.43);
-          border-radius: 16px;
+          justify-self: center;
+          border-radius: 12px;
           box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
           backdrop-filter: blur(5.3px);
-          -webkit-backdrop-filter: blur(5.3px);
-          border: 1px solid rgba(27, 5, 5, 0.51);
-          /* From https://css.glass */
-          background: rgba(27, 5, 5, 0.43);
-          border-radius: 16px;
-          box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-          backdrop-filter: blur(5.3px);
-          -webkit-backdrop-filter: blur(5.3px);
-          border: 1px solid rgba(27, 5, 5, 0.51);
         `}
       >
         Save
