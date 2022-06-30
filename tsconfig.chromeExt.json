@@ -1,0 +1,40 @@
+{
+  "compilerOptions": {
+    "target": "ES6",
+    "useDefineForClassFields": true,
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": false,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "module":"ES6",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": false,
+    "noEmit": false,
+    "jsx": "preserve",
+    "noImplicitAny": true,
+    "baseUrl": ".",
+    "paths": {
+      "~/*": ["chromeExt/*"]
+    },
+    "outDir": "dist",
+    "listEmittedFiles": true,
+    
+  },
+    "types": ["vitest/globals"],
+  "include": ["chromeExt"],
+  "exclude": ["node_modules", "src", "dist", "./chromeExt/tests", "docs"],
+  "typedocOptions": {
+    "entryPointStrategy": "expand",
+    "entryPoints": ["chromeExt/index.ts"],
+    "out": "docs"
+  }
+/*   "references": [
+    {
+      "path": "./tsconfig.chrome.node.json"
+    }
+  ] */
+}

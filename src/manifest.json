@@ -1,0 +1,28 @@
+{
+    "name": "Browser Extension project",
+    "description": "browser extension assessment",
+    "version": "0.5.0",
+    "manifest_version": 3,
+    "background": {
+        "service_worker": "./background.js",
+        "type": "module"
+    },
+    "action": {
+        "default_popup": "./index.html"
+    },
+    "content_scripts": [{
+        "matches": [ "http://*/*", "https://*/*"],
+        "js": ["./content.js"]
+    
+    }], 
+    "permissions": [
+        "activeTab",
+        "tabs",
+        "scripting",
+        "webRequest",
+        "storage"
+    ],
+    "host_permissions": [
+        "*://www.google.com/*"
+    ]
+}
