@@ -68,7 +68,7 @@ function getOldAndCountNew(currentTime: number, data: any): TaskMemory {
 }
 
 function removeOldEntries(entriesToClear: TaskMemory['clearArr']) {
-  chrome.storage.sync.remove(entriesToClear, () => {
+  chrome.storage.sync.remove(Object.keys(entriesToClear), () => {
     console.log('executed')
   })
 }
